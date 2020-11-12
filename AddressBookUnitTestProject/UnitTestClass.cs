@@ -149,12 +149,12 @@ namespace AddressBookUnitTestProject
             }
         }
         /// <summary>
-        /// TC 6(UC 23) -- On calling the employee rest API after the multiple data addition return the address book data of the schema stored inside the database
+        /// TC 6(UC 23) -- On calling the address book rest API after the multiple data addition return the address book data of the schema stored inside the database
         /// </summary>
         [TestMethod]
         public void MultipleAdditionToTheEmplyeeRestAPI_ValidateSuccessFullCount()
         {
-            /// Storing multiple employee data to a list
+            /// Storing multiple address book data to a list
             List<AddressBookModel> addressBookList = new List<AddressBookModel>();
             /// Adding the data to the list
             addressBookList.Add(new AddressBookModel
@@ -199,14 +199,14 @@ namespace AddressBookUnitTestProject
                 addressBookName = "PraveenRecord",
                 DateOfEntry = Convert.ToDateTime("2017-05-06")
             });
-            /// Iterating over the employee list to get each instance
+            /// Iterating over the addressbook list to get each instance
             addressBookList.ForEach(addressData =>
             {
                 /// Arrange
                 /// adding the request to post data to the rest api
                 RestRequest request = new RestRequest("/addressBook", Method.POST);
 
-                /// Instantinating a Json object to host the employee in json format
+                /// Instantinating a Json object to host the address book data in json format
                 JObject jObject = new JObject();
                 /// Adding the data attribute with data elements
                 jObject.Add("firstName", addressData.firstName);
@@ -235,6 +235,42 @@ namespace AddressBookUnitTestProject
                 Assert.AreEqual(addressData.firstName, employeeDataResponse.firstName);
                 Assert.AreEqual(addressData.secondName, employeeDataResponse.secondName);
             });
+        }
+        /// <summary>
+        /// TC 5 -- On calling the address book rest API after the data update return the updated address data of the schema stored inside the database
+        /// </summary>
+        [TestMethod]
+        public void UpdateDataInAddressBookRestAPI_ValidateUpdateSuccess()
+        {
+            /// Creating the instance of the new data or data to be updated
+            AddressBookModel bookModel = new AddressBookModel();
+            bookModel.firstName = "Karan";
+            bookModel.contactType = "Family";
+            bookModel.addressBookName = "DivyaRecord";
+            /// Arrange
+            /// Adding the request to put or update data to the rest api
+            RestRequest request = new RestRequest("/addressBook/4", Method.PUT);
+
+            /// Instantinating a Json object to host the adressbook data in json format
+            JObject jObject = new JObject();
+            /// Adding the data attribute with data elements
+            jObject.Add("firstName", bookModel.firstName);
+            jObject.Add("contactType", bookModel.contactType);
+            jObject.Add("addressBookName", bookModel.addressBookName);
+            /// Adding parameter to the rest request jObject - contains the parameter list of the json database
+            request.AddParameter("application/json", jObject, ParameterType.RequestBody);
+            /// Act
+            /// Adding the data to the json server in json format
+            IRestResponse response = restClient.Execute(request);
+            /// Assert
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+            /// Getting the recently added data as json format and then deserialise it to Employee object
+            AddressBookModel addressBookDataResponse = JsonConvert.DeserializeObject<AddressBookModel>(response.Content);
+            /// Assert updated data
+            Assert.AreEqual(bookModel.firstName, addressBookDataResponse.firstName);
+            Assert.AreEqual(bookModel.contactType, addressBookDataResponse.contactType);
+            Assert.AreEqual(bookModel.addressBookName, addressBookDataResponse.addressBookName);
+            Console.WriteLine(response.Content);
         }
     }
 }
