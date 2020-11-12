@@ -13,6 +13,7 @@ namespace AddressBookUnitTestProject
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System;
+    using Newtonsoft.Json.Linq;
 
     [TestClass]
     public class UnitTestClass
@@ -146,6 +147,94 @@ namespace AddressBookUnitTestProject
                                 $"Date Of Entry in the Address Book: { bookModel.DateOfEntry}");
                 Console.WriteLine("\n\n");
             }
+        }
+        /// <summary>
+        /// TC 6(UC 23) -- On calling the employee rest API after the multiple data addition return the address book data of the schema stored inside the database
+        /// </summary>
+        [TestMethod]
+        public void MultipleAdditionToTheEmplyeeRestAPI_ValidateSuccessFullCount()
+        {
+            /// Storing multiple employee data to a list
+            List<AddressBookModel> addressBookList = new List<AddressBookModel>();
+            /// Adding the data to the list
+            addressBookList.Add(new AddressBookModel
+            {
+                firstName = "Nicki",
+                secondName = "Mehta",
+                address = "Sec-6",
+                city = "Jaipur",
+                state = "Rajasthan",
+                zip = 302001,
+                phoneNumber = 72064565,
+                emailId = "nicki@gmail.com",
+                contactType = "Profession",
+                addressBookName = "PraveenRecord",
+                DateOfEntry = Convert.ToDateTime("2019-05-06")
+            });
+            addressBookList.Add(new AddressBookModel
+            {
+                firstName = "Shardendu",
+                secondName = "Mehta",
+                address = "Sec-6",
+                city = "Jaipur",
+                state = "Rajasthan",
+                zip = 302008,
+                phoneNumber = 73564565,
+                emailId = "shardendu@gmail.com",
+                contactType = "Friend",
+                addressBookName = "PraveenRecord",
+                DateOfEntry = Convert.ToDateTime("2018-05-06")
+            });
+            addressBookList.Add(new AddressBookModel
+            {
+                firstName = "Karan",
+                secondName = "Mehta",
+                address = "Sec-6",
+                city = "Jaipur",
+                state = "Rajasthan",
+                zip = 302009,
+                phoneNumber = 78764565,
+                emailId = "karan@gmail.com",
+                contactType = "Family",
+                addressBookName = "PraveenRecord",
+                DateOfEntry = Convert.ToDateTime("2017-05-06")
+            });
+            /// Iterating over the employee list to get each instance
+            addressBookList.ForEach(addressData =>
+            {
+                /// Arrange
+                /// adding the request to post data to the rest api
+                RestRequest request = new RestRequest("/addressBook", Method.POST);
+
+                /// Instantinating a Json object to host the employee in json format
+                JObject jObject = new JObject();
+                /// Adding the data attribute with data elements
+                jObject.Add("firstName", addressData.firstName);
+                jObject.Add("secondName", addressData.secondName);
+                jObject.Add("address", addressData.address);
+                jObject.Add("city", addressData.city);
+                jObject.Add("state", addressData.state);
+                jObject.Add("zip", addressData.zip);
+                jObject.Add("phoneNumber", addressData.phoneNumber);
+                jObject.Add("emailId", addressData.emailId);
+                jObject.Add("contactType", addressData.contactType);
+                jObject.Add("addressBookName", addressData.addressBookName);
+                jObject.Add("dateOfEntry", addressData.DateOfEntry);
+                /// Note aove that the id is auto increment and will act as a primary key to the whole database
+                /// Adding parameter to the rest request jObject - contains the parameter list of the json database
+                request.AddParameter("application/json", jObject, ParameterType.RequestBody);
+                /// Act
+                /// Adding the data to the json server in json format
+                IRestResponse response = restClient.Execute(request);
+                /// Assert
+                /// 201-- Code for post
+                Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.Created);
+                /// Getting the recently added data as json format and then deserialise it to Employee object
+                AddressBookModel employeeDataResponse = JsonConvert.DeserializeObject<AddressBookModel>(response.Content);
+                /// Asserting the data entered
+                Assert.AreEqual(addressData.firstName, employeeDataResponse.firstName);
+                Assert.AreEqual(addressData.secondName, employeeDataResponse.secondName);
+            });
         }
     }
 }
