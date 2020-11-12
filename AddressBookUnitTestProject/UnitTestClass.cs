@@ -135,10 +135,10 @@ namespace AddressBookUnitTestProject
             IRestResponse response = GetAddressBookList();
             /// Assert
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
-
+            /// A list to store the deserialized instance of the data fromm the json server
             List<AddressBookModel> addressBookDataResponse = JsonConvert.DeserializeObject<List<AddressBookModel>>(response.Content);
-            Assert.AreEqual(1, addressBookDataResponse.Count);
-
+            Assert.AreEqual(3, addressBookDataResponse.Count);
+            /// Printing each data from the retrieved records
             foreach (AddressBookModel bookModel in addressBookDataResponse)
             {
                 Console.WriteLine($"First Name:{bookModel.firstName}\nSecond Name:{bookModel.secondName}\n" +
@@ -229,7 +229,7 @@ namespace AddressBookUnitTestProject
                 /// Assert
                 /// 201-- Code for post
                 Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.Created);
-                /// Getting the recently added data as json format and then deserialise it to Employee object
+                /// Getting the recently added data as json format and then deserialise it to address book model object
                 AddressBookModel employeeDataResponse = JsonConvert.DeserializeObject<AddressBookModel>(response.Content);
                 /// Asserting the data entered
                 Assert.AreEqual(addressData.firstName, employeeDataResponse.firstName);
@@ -237,7 +237,7 @@ namespace AddressBookUnitTestProject
             });
         }
         /// <summary>
-        /// TC 5 -- On calling the address book rest API after the data update return the updated address data of the schema stored inside the database
+        /// TC 7(UC24) -- On calling the address book rest API after the data update return the updated address data of the schema stored inside the database
         /// </summary>
         [TestMethod]
         public void UpdateDataInAddressBookRestAPI_ValidateUpdateSuccess()
@@ -264,12 +264,29 @@ namespace AddressBookUnitTestProject
             IRestResponse response = restClient.Execute(request);
             /// Assert
             Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
-            /// Getting the recently added data as json format and then deserialise it to Employee object
+            /// Getting the recently added data as json format and then deserialise it to address book model object
             AddressBookModel addressBookDataResponse = JsonConvert.DeserializeObject<AddressBookModel>(response.Content);
             /// Assert updated data
             Assert.AreEqual(bookModel.firstName, addressBookDataResponse.firstName);
             Assert.AreEqual(bookModel.contactType, addressBookDataResponse.contactType);
             Assert.AreEqual(bookModel.addressBookName, addressBookDataResponse.addressBookName);
+            Console.WriteLine(response.Content);
+        }
+        /// <summary>
+        /// TC 8(UC25) -- On calling the address book rest API after the data delete return the assert value with status code
+        /// </summary>
+        [TestMethod]
+        public void DeleteDataInAddressBookRestAPI_ValidateDeleteSuccess()
+        {
+            /// Arrange
+            /// Adding the request to delete data from the rest api using ID
+            RestRequest request = new RestRequest("/addressBook/4", Method.DELETE);
+            /// Act
+            /// Adding the data to the json server in json format
+            IRestResponse response = restClient.Execute(request);
+            /// Assert
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+            /// Printing the respose content after delete operation
             Console.WriteLine(response.Content);
         }
     }
